@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-let genAI: GoogleGenerativeAI;
-let model: any;
+let genAI;
+let model;
 
-export const initializeGemini = (apiKey: string) => {
+export const initializeGemini = (apiKey) => {
   genAI = new GoogleGenerativeAI(apiKey);
   model = genAI.getGenerativeModel({ 
     model: "gemini-pro",
@@ -16,28 +16,28 @@ export const initializeGemini = (apiKey: string) => {
   });
 };
 
-const getLanguagePrompt = (language: string): string => {
-  const languagePrompts: { [key: string]: string } = {
+const getLanguagePrompt = (language) => {
+  const languagePrompts = {
+    en: 'English',
     hi: 'हिंदी',
     mr: 'मराठी',
     pa: 'ਪੰਜਾਬੀ',
     bn: 'বাংলা',
     te: 'తెలుగు',
+    kn: 'ಕನ್ನಡ',
   };
 
-  return languagePrompts[language] || 'हिंदी';
+  return languagePrompts[language] || 'English';
 };
 
-export const generateResponse = async (
-  prompt: string,
-  language: string
-): Promise<string> => {
+export const generateResponse = async (prompt, selectedLanguage) => {
   if (!model) {
     throw new Error('Gemini model not initialized');
   }
 
   try {
-    const languageName = getLanguagePrompt(language);
+    const languageName = getLanguagePrompt(selectedLanguage);
+
     const systemPrompt = `You are a knowledgeable agricultural assistant helping Indian farmers.
     IMPORTANT INSTRUCTIONS:
     1. You MUST respond ONLY in ${languageName} language
@@ -67,7 +67,7 @@ export const generateResponse = async (
   }
 };
 
-const cleanResponse = (text: string): string => {
+const cleanResponse = (text) => {
   return text
     .replace(/\*\*/g, '')
     .replace(/\*/g, '')
