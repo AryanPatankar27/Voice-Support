@@ -1,10 +1,9 @@
-interface LanguageConfig {
-  speech: string;
-  bcp47: string;
-  geminiName: string;
-}
-
-const languageMappings: { [key: string]: LanguageConfig } = {
+const languageMappings = {
+  en: {
+    speech: 'en-IN',
+    bcp47: 'en-IN',
+    geminiName: 'English'
+  },
   hi: {
     speech: 'hi-IN',
     bcp47: 'hi-IN',
@@ -29,13 +28,18 @@ const languageMappings: { [key: string]: LanguageConfig } = {
     speech: 'te-IN',
     bcp47: 'te-IN',
     geminiName: 'తెలుగు'
+  },
+  kn: {
+    speech: 'kn-IN',
+    bcp47: 'kn-IN',
+    geminiName: 'ಕನ್ನಡ'
   }
 };
 
-export const getLanguageCode = (language: string): string => {
-  return languageMappings[language]?.speech || 'hi-IN';
+export const getLanguageCode = (language) => {
+  return languageMappings[language]?.speech || 'en-IN';
 };
 
-export const getGeminiLanguageName = (language: string): string => {
-  return languageMappings[language]?.geminiName || 'हिंदी';
+export const getGeminiLanguageName = (language) => {
+  return languageMappings[language]?.geminiName || 'English';
 };
