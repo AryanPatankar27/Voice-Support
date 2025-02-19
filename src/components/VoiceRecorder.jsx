@@ -1,12 +1,7 @@
 import React from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { Mic, Loader2 } from 'lucide-react';
 
-interface VoiceRecorderProps {
-  onRecordingComplete: () => void;
-  isProcessing: boolean;
-}
-
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, isProcessing }) => {
+const VoiceRecorder = ({ onRecordingComplete, isProcessing }) => {
   return (
     <button
       onClick={onRecordingComplete}
