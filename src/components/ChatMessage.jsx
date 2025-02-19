@@ -1,12 +1,7 @@
 import React from 'react';
-import { Message } from '../types';
 import { Volume2 } from 'lucide-react';
 
-interface ChatMessageProps {
-  message: Message;
-}
-
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+const ChatMessage = ({ message }) => {
   const playAudio = () => {
     if (message.audioUrl) {
       const audio = new Audio(message.audioUrl);
