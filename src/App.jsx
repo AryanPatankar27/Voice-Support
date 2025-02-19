@@ -3,20 +3,19 @@ import { Tractor } from 'lucide-react';
 import VoiceRecorder from './components/VoiceRecorder';
 import ChatMessage from './components/ChatMessage';
 import LanguageSelector from './components/LanguageSelector';
-import { Message, Language } from './types';
 import { initializeGemini, generateResponse } from './services/gemini';
 import { speechToText, textToSpeech } from './services/speech';
 import { getLanguageCode } from './utils/languageMapping';
 
-const GEMINI_API_KEY = 'AIzaSyDSynDh4asJf6mcqtiEy2A5SG4UdX8wEIE';
+const GEMINI_API_KEY = 'your-api-key';
 
 function App() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>({
-    code: 'hi',
-    name: 'Hindi',
-    localName: 'हिंदी',
+  const [selectedLanguage, setSelectedLanguage] = useState({
+    code: 'en',
+    name: 'English',
+    localName: 'English',
   });
 
   useEffect(() => {
@@ -27,18 +26,15 @@ function App() {
     setIsProcessing(true);
     
     try {
-      // Add user's message to show recording started
-      const userMessage: Message = {
+      const userMessage = {
         content: '🎤 Recording...',
         type: 'user',
       };
       setMessages((prev) => [...prev, userMessage]);
 
-      // 1. Convert speech to text
       const languageCode = getLanguageCode(selectedLanguage.code);
       const transcribedText = await speechToText(languageCode);
       
-      // Update user message with transcribed text immediately
       setMessages((prev) => 
         prev.map((msg, idx) => 
           idx === prev.length - 1 
@@ -47,17 +43,14 @@ function App() {
         )
       );
 
-      // 2. Generate response using Gemini
       const response = await generateResponse(transcribedText, selectedLanguage.code);
 
-      // Add assistant's response immediately
-      const assistantMessage: Message = {
+      const assistantMessage = {
         content: response,
         type: 'assistant',
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // 3. Convert response to speech in parallel
       textToSpeech(response, languageCode).catch(error => {
         console.error('Text-to-speech error:', error);
       });
@@ -65,16 +58,18 @@ function App() {
     } catch (error) {
       console.error('Error processing voice message:', error);
       
-      const errorMessages: { [key: string]: string } = {
+      const errorMessages = {
+        en: 'Sorry, there was an error processing your message. Please try again.',
         hi: 'क्षमा करें, आपका संदेश प्रोसेस करने में त्रुटि हुई। कृपया पुनः प्रयास करें।',
         mr: 'क्षमस्व, तुमचा संदेश प्रक्रिया करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.',
         pa: 'ਮੁਆਫ਼ ਕਰਨਾ, ਤੁਹਾਡਾ ਸੁਨੇਹਾ ਪ੍ਰੋਸੈਸ ਕਰਨ ਵਿੱਚ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
         bn: 'দুঃখিত, আপনার বার্তা প্রক্রিয়া করতে ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
         te: 'క్షమించండి, మీ సందేశాన్ని ప్రాసెస్ చేయడంలో లోపం జరిగింది. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+        kn: 'ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಲ್ಲಿ ದೋಷ ಕಂಡುಬಂದಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
       };
-
-      const errorMessage: Message = {
-        content: errorMessages[selectedLanguage.code] || errorMessages.hi,
+      
+      const errorMessage = {
+        content: errorMessages[selectedLanguage.code] || errorMessages.en,
         type: 'assistant',
       };
       
@@ -90,7 +85,7 @@ function App() {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Tractor className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">किसान साथी</h1>
+            <h1 className="text-2xl font-bold">Kisan Saathi / किसान साथी</h1>
           </div>
           <LanguageSelector
             selectedLanguage={selectedLanguage}
@@ -104,11 +99,11 @@ function App() {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500">
               <Tractor className="w-16 h-16 mb-4 text-green-500" />
-              <p className="text-xl mb-2">आपका स्वागत है! (Welcome!)</p>
-              <p className="text-sm">
-                अपना सवाल पूछने के लिए नीचे माइक बटन दबाएं
-                <br />
+              <p className="text-xl mb-2">Welcome! / आपका स्वागत है!</p>
+              <p className="text-sm text-center">
                 Press the mic button below to ask your question
+                <br />
+                अपना सवाल पूछने के लिए नीचे माइक बटन दबाएं
               </p>
             </div>
           ) : (
