@@ -1,4 +1,4 @@
-export const speechToText = (language: string): Promise<string> => {
+export const speechToText = (language) => {
   return new Promise((resolve, reject) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -13,14 +13,13 @@ export const speechToText = (language: string): Promise<string> => {
     recognition.maxAlternatives = 1;
 
     let finalTranscript = '';
-    let silenceTimer: NodeJS.Timeout;
+    let silenceTimer;
     const SILENCE_DURATION = 1500; // 1.5 seconds of silence to detect end of speech
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       finalTranscript = transcript;
       
-      // Clear and reset silence timer
       clearTimeout(silenceTimer);
       silenceTimer = setTimeout(() => {
         recognition.stop();
@@ -44,36 +43,33 @@ export const speechToText = (language: string): Promise<string> => {
   });
 };
 
-export const textToSpeech = async (text: string, language: string): Promise<void> => {
+export const textToSpeech = async (text, language) => {
   return new Promise((resolve, reject) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language;
-    utterance.rate = 0.9; // Slightly slower rate for better clarity
-    utterance.pitch = 1.0; // Natural pitch
-    
-    // Split long responses into sentences for better speech synthesis
-    const sentences = text.split(/[।.!?]/).filter(Boolean);
-    let currentIndex = 0;
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
 
-    utterance.onend = () => {
-      currentIndex++;
-      if (currentIndex < sentences.length) {
-        const nextUtterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
-        nextUtterance.lang = language;
-        nextUtterance.rate = 0.9;
-        nextUtterance.pitch = 1.0;
-        window.speechSynthesis.speak(nextUtterance);
-      } else {
-        resolve();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language;
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const languageVoice = voices.find(voice => voice.lang.startsWith(language.split('-')[0]));
+      if (languageVoice) {
+        utterance.voice = languageVoice;
       }
-    };
 
-    utterance.onerror = (event) => {
-      reject(new Error(`Speech synthesis error: ${event.error}`));
-    };
+      utterance.onend = () => {
+        resolve();
+      };
 
-    // Start showing the text response immediately
-    utterance.text = sentences[0];
-    window.speechSynthesis.speak(utterance);
+      utterance.onerror = (event) => {
+        reject(new Error(`Speech synthesis error: ${event.error}`));
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      reject(new Error('Speech synthesis not supported in this browser'));
+    }
   });
 };
